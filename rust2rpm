@@ -1,0 +1,190 @@
+#!/usr/bin/python3
+import argparse
+import sys
+
+def parse_args(args=None):
+    # Initialize the argument parser
+    parser = argparse.ArgumentParser(
+        description="Generate RPM packages for Rust crates"
+    )
+
+    # Add arguments according to the specified parameters
+    parser.add_argument(
+        '--pkgid',
+        help="Crate on crates.io, or crate@version for specific versions, or @version to auto-detect the crate name."
+    )
+
+    parser.add_argument(
+        '--config-file',
+    #    default='./rust2rpm.toml',
+        help="Path to rust2rpm.toml config file (default: ./rust2rpm.toml)"
+    )
+
+    parser.add_argument(
+        '--outdir',
+        default='.',
+        help="Target directory for any created files."
+    )
+
+    parser.add_argument(
+        '--noop',
+        choices=['enable', 'disable'],
+        default='disable',
+        help="Do nothing (enable or disable)."
+    )
+
+    parser.add_argument(
+        '--path',
+        help="Path to local project directory or Cargo.toml file to check instead of crates.io."
+    )
+
+    parser.add_argument(
+        '--target',
+        choices=['fedora', 'opensuse', 'epel8', 'mageia', 'plain'],
+        help="Distribution target."
+    )
+
+    parser.add_argument(
+        '--vendor',
+        choices=['off', 'auto', 'manual'],
+    #    default='off',
+        help="Write a spec for building with vendored dependencies (default: off)."
+    )
+
+    parser.add_argument(
+        '--rpmautospec',
+        choices=['enable', 'disable'],
+        default='disable',
+        help="Use autorelease and autochangelog features."
+    )
+
+    parser.add_argument(
+        '--no-rpmautospec',
+        choices=['enable', 'disable'],
+        default='disable',
+        help="Do not use rpmautospec."
+    )
+
+    parser.add_argument(
+        '--compat',
+        choices=['enable', 'disable'],
+        default='disable',
+        help="Create a compat package with appropriate version suffix."
+    )
+
+    parser.add_argument(
+        '--no-existence-check',
+        choices=['enable', 'disable'],
+        default='enable',
+        help="Do not check whether the package already exists in dist-git."
+    )
+
+    parser.add_argument(
+        '--offline',
+        choices=['enable', 'disable'],
+        default='disable',
+        help="Skip network queries to crates.io and/or src.fedoraproject.org."
+    )
+
+    parser.add_argument(
+        '--patch',
+        choices=['enable', 'disable'],
+        default='disable',
+        help="Do manual patching of Cargo.toml."
+    )
+
+    parser.add_argument(
+        '--no-patch-foreign',
+        choices=['enable', 'disable'],
+        default='disable',
+        help="Do not automatically drop foreign dependencies in Cargo.toml."
+    )
+
+    parser.add_argument(
+        '--reuse-patch',
+        choices=['enable', 'disable'],
+        default='disable',
+        help="Attempt to re-apply existing Cargo.toml patch."
+    )
+
+    parser.add_argument(
+        '--store-crate',
+        choices=['enable', 'disable'],
+        default='enable',
+        help="Store crate in the current directory."
+    )
+
+    parser.add_argument(
+        '--validate-only',
+        choices=['enable', 'disable'],
+        default='disable',
+        help="Validate rust2rpm.toml config file and exit."
+    )
+
+    # Parse the arguments
+    args = parser.parse_args(args)
+    return args
+
+dc = parse_args()
+
+if dc.noop == 'enable':
+    sys.exit(0)
+
+args = []
+
+if dc.pkgid:
+    args.append(dc.pkgid)
+
+if dc.config_file:
+    args.extend(('--config-file', dc.config_file))
+
+args.extend(('--output-directory', dc.outdir))
+
+if dc.path:
+    args.extend(('--path', dc.path))
+
+if dc.target:
+    args.extend(('--target', dc.target))
+
+if dc.vendor:
+    args.extend(('--vendor', dc.vendor))
+
+if dc.rpmautospec == 'enable':
+    args.append('--rpmautospec')
+
+if dc.no_rpmautospec == 'enable':
+    args.append('--no-rpmautospec')
+
+if dc.compat =='enable':
+    args.append('--compat')
+
+if dc.no_existence_check == 'enable':
+    args.append('--no-existence-check')
+
+if dc.offline == 'enable':
+    args.append('--offline')
+
+if dc.patch == 'enable':
+    args.append('--patch')
+
+if dc.no_patch_foreign == 'enable':
+    args.append('--no-patch-foreign')
+
+if dc.reuse_patch == 'enable':
+    args.append('--reuse-patch')
+
+if dc.store_crate == 'enable':
+    args.append('--store-crate')
+
+if dc.validate_only == 'enable':
+    args.append('--validate-only')
+
+import re
+from rust2rpm.__main__ import main
+
+argv = [re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])]
+argv.extend(args)
+print(argv)
+sys.argv = argv
+sys.exit(main())
+

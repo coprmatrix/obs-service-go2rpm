@@ -1,0 +1,118 @@
+<service name="rust2rpm">
+  <summary>Use of the rust2rpm command</summary>
+  <description>Generate RPM packages for Rust crates</description>
+
+  <parameter name="pkgid">
+    <description>
+      Crate on crates.io, or crate@version for specific versions, or @version to auto-detect the crate name.
+    </description>
+  </parameter>
+
+  <parameter name="config-file">
+    <description>
+      Path to rust2rpm.toml config file (default: ./rust2rpm.toml)
+    </description>
+  </parameter>
+
+  <parameter name="outdir">
+    <description>
+      Target directory for any created files.
+    </description>
+  </parameter>
+
+  <parameter name="noop">
+    <description>
+      Do nothing
+    </description>
+    <allowedvalue>enable</allowedvalue>
+    <allowedvalue>disable</allowedvalue>
+  </parameter>
+
+  <parameter name="path">
+    <description>
+      Path to local project directory or Cargo.toml file to check instead of crates.io.
+    </description>
+  </parameter>
+
+  <parameter name="target">
+    <description>
+      Distribution target.
+    </description>
+    <allowedvalue>fedora</allowedvalue>
+    <allowedvalue>opensuse</allowedvalue>
+    <allowedvalue>epel8</allowedvalue>
+    <allowedvalue>mageia</allowedvalue>
+    <allowedvalue>plain</allowedvalue>
+  </parameter>
+
+  <parameter name="vendor">
+    <description>
+      Write a spec for building with vendored dependencies (default: off).
+    </description>
+    <allowedvalue>off</allowedvalue>
+    <allowedvalue>auto</allowedvalue>
+    <allowedvalue>manual</allowedvalue>
+  </parameter>
+
+  <parameter name="rpmautospec">
+    <description>
+      Use autorelease and autochangelog features.
+    </description>
+    <allowedvalue>enable</allowedvalue>
+    <allowedvalue>disable</allowedvalue>
+  </parameter>
+
+  <parameter name="no-rpmautospec">
+    <description>
+      Do not use rpmautospec.
+    </description>
+  </parameter>
+
+  <parameter name="compat">
+    <description>
+      Create a compat package with appropriate version suffix.
+    </description>
+  </parameter>
+
+  <parameter name="no-existence-check">
+    <description>
+      Do not check whether the package already exists in dist-git.
+    </description>
+  </parameter>
+
+  <parameter name="offline">
+    <description>
+      Skip network queries to crates.io and/or src.fedoraproject.org.
+    </description>
+  </parameter>
+
+  <parameter name="patch">
+    <description>
+      Do manual patching of Cargo.toml.
+    </description>
+  </parameter>
+
+  <parameter name="no-patch-foreign">
+    <description>
+      Do not automatically drop foreign dependencies in Cargo.toml.
+    </description>
+  </parameter>
+
+  <parameter name="reuse-patch">
+    <description>
+      Attempt to re-apply existing Cargo.toml patch.
+    </description>
+  </parameter>
+
+  <parameter name="store-crate">
+    <description>
+      Store crate in the current directory.
+    </description>
+  </parameter>
+
+  <parameter name="validate-only">
+    <description>
+      Validate rust2rpm.toml config file and exit.
+    </description>
+  </parameter>
+</service>

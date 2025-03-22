@@ -8,6 +8,24 @@
     </description>
   </parameter>
 
+  <parameter name="name">
+    <description>
+      The name of the crate.
+    </description>
+  </parameter>
+
+  <parameter name="version">
+    <description>
+      The version of the crate, uses latest if not set.
+    </description>
+  </parameter>
+
+  <parameter name="packager">
+    <description>
+      Packager identity (in the form of 'Name: email'), uses distribution fallback if not set.
+    </description>
+  </parameter>
+
   <parameter name="config-file">
     <description>
       Path to rust2rpm.toml config file (default: ./rust2rpm.toml)
@@ -34,7 +52,7 @@
     </description>
   </parameter>
 
-  <parameter name="target">
+  <parameter name="type">
     <description>
       Distribution target.
     </description>

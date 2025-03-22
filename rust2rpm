@@ -1,4 +1,14 @@
 #!/usr/bin/python3
+
+# This file is part of obs-service-rust2rpm
+# Author: Neal Gompa <ngompa13@gmail.com>
+#
+# Fedora-License-Identifier: MIT
+# SPDX-License-Identifier: MIT
+# Please see LICENSE for the full details of the license terms
+#
+# This file is a wrapper script around rust2rpm for consumption by OBS
+
 import argparse
 import sys
 from os import environ
@@ -10,18 +20,18 @@ def parse_args(args=None):
     )
 
     parser.add_argument(
-        "--packager",
+        "-p", "--packager",
         help="Packager identity (in the form of 'Name: email')",
         nargs="*"
     )
 
     parser.add_argument(
-        "--name",
+        "-n", "--name",
         help="Name of crate on crates.io"
     )
 
     parser.add_argument(
-        "--version",
+        "-v", "--version",
         help="Version of crate on crates.io"
     )
 
@@ -37,7 +47,7 @@ def parse_args(args=None):
     )
 
     parser.add_argument(
-        '--outdir',
+        "-o", '--outdir',
         default='.',
         help="Target directory for any created files."
     )
@@ -55,7 +65,7 @@ def parse_args(args=None):
     )
 
     parser.add_argument(
-        '--target',
+        "-t", '--type',
         choices=['fedora', 'opensuse', 'epel8', 'mageia', 'plain'],
         help="Distribution target."
     )
@@ -162,7 +172,7 @@ else:
 if not dc.packager:
     environ["RUST2RPM_NO_DETECT_PACKAGER"] = "true"
 else:
-    packager = " ".join(dc.packager))
+    packager = " ".join(dc.packager)
     packager_split = packager.split(":")
     if len(packager_split) >= 2:
         environ["RUST2RPM_PACKAGER"] = "{} <{}>".format(packager_split[0].strip(), packager_split[1].strip())
@@ -177,8 +187,8 @@ args.extend(('--output-directory', dc.outdir))
 if dc.path:
     args.extend(('--path', dc.path))
 
-if dc.target:
-    args.extend(('--target', dc.target))
+if dc.type:
+    args.extend(('--target', dc.type))
 
 if dc.vendor:
     args.extend(('--vendor', dc.vendor))
@@ -216,7 +226,7 @@ if dc.validate_only == 'enable':
 import re
 from rust2rpm.__main__ import main
 
-argv = [re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])]
+argv = ['rust2rpm']
 argv.extend(args)
 print(argv)
 sys.argv = argv

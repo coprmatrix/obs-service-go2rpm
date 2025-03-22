@@ -4,7 +4,7 @@ Name:           obs-service-rust2rpm
 Summary:        An OBS source service: Create spec files for rust crates
 License:        GPL-2.0-or-later
 Group:          Development/Tools/Building
-Version:        1.16
+Version:        1.17
 Release:        0%{?autorelease}
 Source:         rust2rpm
 Source1:        rust2rpm.service

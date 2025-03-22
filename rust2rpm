@@ -164,7 +164,7 @@ else:
     pkgid = ''
     if dc.name:
         pkgid += dc.name
-    if dc.version
+    if dc.version:
         pkgid += '@' + dc.version
     if pkgid:
         args.append(pkgid)

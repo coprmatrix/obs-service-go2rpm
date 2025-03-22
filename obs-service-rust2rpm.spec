@@ -4,11 +4,12 @@ Name:           obs-service-rust2rpm
 Summary:        An OBS source service: Create spec files for rust crates
 License:        GPL-2.0-or-later
 Group:          Development/Tools/Building
-Version:        0.1
+Version:        0.2
 Release:        0%{?autorelease}
 Source:         rust2rpm
 Source1:        rust2rpm.service
-Requires:       python3-rust2rpm
+Requires:       rust2rpm
+Requires:       rust2rpm-helper
 BuildArch:      noarch
 BuildRequires:  rpm_macro(_obs_service_dir)
 

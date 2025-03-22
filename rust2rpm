@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import sys
+from os import environ
 
 def parse_args(args=None):
     # Initialize the argument parser
@@ -8,7 +9,22 @@ def parse_args(args=None):
         description="Generate RPM packages for Rust crates"
     )
 
-    # Add arguments according to the specified parameters
+    parser.add_argument(
+        "--packager",
+        help="Packager identity (in the form of 'Name: email')",
+        nargs="*"
+    )
+
+    parser.add_argument(
+        "--name",
+        help="Name of crate on crates.io"
+    )
+
+    parser.add_argument(
+        "--version",
+        help="Version of crate on crates.io"
+    )
+
     parser.add_argument(
         '--pkgid',
         help="Crate on crates.io, or crate@version for specific versions, or @version to auto-detect the crate name."
@@ -134,6 +150,24 @@ args = []
 
 if dc.pkgid:
     args.append(dc.pkgid)
+else:
+    pkgid = ''
+    if dc.name:
+        pkgid += dc.name
+    if dc.version
+        pkgid += '@' + dc.version
+    if pkgid:
+        args.append(pkgid)
+
+if not dc.packager:
+    environ["RUST2RPM_NO_DETECT_PACKAGER"] = "true"
+else:
+    packager = " ".join(dc.packager))
+    packager_split = packager.split(":")
+    if len(packager_split) >= 2:
+        environ["RUST2RPM_PACKAGER"] = "{} <{}>".format(packager_split[0].strip(), packager_split[1].strip())
+    else:
+        environ["RUST2RPM_PACKAGER"] = packager.strip()
 
 if dc.config_file:
     args.extend(('--config-file', dc.config_file))

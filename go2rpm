@@ -1,0 +1,266 @@
+#!/usr/bin/python3
+
+import argparse
+import sys
+from os import environ
+
+name = 'go2rpm'
+summary = 'Use of the rust2rpm command'
+desc = 'Generate RPM packages for go modules'
+
+
+class Flag(str):
+    def __bool__(self):
+        return self.__enabled
+
+    def __call__(self, args, name):
+        if (self):
+            args.append(name)
+
+    def __init__(self, name):
+     #   super().__init__(name)
+        self.__enabled = (name == "enable")
+
+class DualFlag(Flag):
+    def __bool__(self):
+        return self.disable != "disable"
+
+    def __call__(self, args, name):
+        if (self.enable):
+            args.append(name)
+        elif (self.disable):
+            args.append("--no" + name[1:])
+
+    def __init__(self, name):
+     #   super().__init__(name)
+        self.enable = (name == "enable")
+        self.disable = (name == "disable")
+
+
+def parse_args(args=None):
+    # Initialize the argument parser
+    parser = argparse.ArgumentParser(
+        description=desc
+    )
+
+    parser.pos_args = ['--goipath']
+
+    parser.add_argument(
+        "--goipath",
+        help="Import path",
+    )
+
+    parser.add_argument(
+        '--noop',
+        choices=['enable', 'disable'],
+        default='disable',
+        type=Flag,
+        help="Do nothing (enable or disable)."
+    )
+
+    parser.add_argument(
+        '--rpmautospec',
+        choices=['enable', 'disable'],
+        default=None,#'enable',
+        type=DualFlag,
+        help="Use autorelease and autochangelog features."
+    )
+
+    parser.add_argument(
+        '--no-auto-changelog-entry',
+        choices=['enable', 'disable'],
+        default='disable',
+        type=Flag,
+        help="Do not generate a changelog entry"
+    )
+
+    parser.add_argument(
+        '--profile',
+        choices=['1', '2', 'vendor'],
+        default=None,#'2',
+        help="Profile of macros to use. 1: legacy macros. 2: current macros. vendor: support bundled vendoring."
+    )
+
+    parser.add_argument(
+        '--no-spec-warnings',
+        choices=['enable', 'disable'],
+        default='disable',
+        type=Flag,
+        help="Do not use warnings comments from generated specfile."
+    )
+
+    parser.add_argument(
+        '--use-new-versioning',
+        choices=['enable', 'disable'],
+        default=None,
+        type=DualFlag,
+        help="Enable new naming scheme for versioned compat packages."
+    )
+
+    parser.add_argument(
+        "--forge",
+        help="Forge URL"
+    )
+
+    parser.add_argument(
+        "--subdir",
+        help="Git subdirectory to specifically package"
+    )
+
+    parser.add_argument(
+        "--altipaths",
+        help="List of alternate import paths",
+        action="append"
+    )
+
+    parser.add_argument(
+        "--version",
+        help="Package version"
+    )
+
+    parser.add_argument(
+        "--tag",
+        help="Package tag"
+    )
+
+    parser.add_argument(
+        "--commit",
+        help="Package commit"
+    )
+
+    parser.add_argument(
+        '--dynamic-buildrequires',
+        choices=['enable', 'disable'],
+        default=None,#'enable',
+        type=DualFlag,
+        help="Use dynamic BuildRequires feature."
+    )
+
+    parser.add_argument(
+        '--clean',
+        choices=['enable', 'disable'],
+        default=None,#'disable',
+        type=DualFlag,
+        help="Clean cache for chosen Go import path"
+    )
+
+    parser.add_argument(
+        '--clean-all',
+        choices=['enable', 'disable'],
+        default='disable',
+        type=Flag,
+        help="Clean all cached Go imports"
+    )
+
+    parser.add_argument(
+        "--create-directory",
+        choices=['enable', 'disable'],
+        default='disable',
+        type=Flag,
+        help="Save the final specfile output to NAME/NAME.spec"
+    )
+
+    parser.add_argument(
+        "--name",
+        help="Specify the name for the spec file (max 64 characters)."
+    )
+
+    parser.add_argument(
+        "--outdir",
+        help="Specify the output directory."
+    )
+
+    parser.add_argument(
+        "--download",
+        choices=['enable', 'disable'],
+        default=None,#'disable',
+        type=DualFlag,
+        help="Download source tarball with spectool"
+    )
+
+    parser.add_argument(
+        "--compresslevel",
+        help="See '--compresslevel' in 'man go_vendor_archive_create'"
+    )
+
+    parser.add_argument(
+        "--compress",
+        help="See '--compress' in 'man go_vendor_archive_create' Default: bz2"
+    )
+
+    parser.add_argument(
+        "--detector",
+        help="Which license detector to use with go_vendor_license"
+    )
+
+    # Parse the arguments
+    args = parser.parse_args(args)
+    args.argparser = parser
+    return args
+
+dc = parse_args()
+
+parser = dc.argparser
+
+
+def show_help(parser, f):
+    print(f"<service name=\"{name}\">", file=f)
+    print(f" <summary>{summary}</summary>", file=f)
+    print(f" <description>{desc}</description>", file=f)
+    for action in parser._actions:
+        opt = action.option_strings[0]
+        if (opt == '-h'):
+            continue
+        opt = opt[2:]
+        print(f"  <parameter name=\"{opt}\">", file=f)
+        print(f"   <description>{action.help}</description>", file=f)
+        try:
+            for opt in action.choices:
+                print(f"   <allowedvalue>{opt}</allowedvalue>", file=f)
+        except TypeError:
+            pass
+        print(f"  </parameter>", file=f)
+    print( "</service>", file=f)
+
+
+if dc.noop == 'enable':
+    v = environ.get("SERVICE_OUTFILE")
+    if v:
+        if v.lower() == "<stdout>":
+            f = None
+        else:
+            f = open(v, 'w')
+        show_help(parser, f)
+    sys.exit(0)
+
+args = ['go2rpm']
+pos = []
+for action in parser._actions:
+    opt = action.option_strings[0]
+    name = opt[2:].replace("-", "_")
+    if not name:
+        continue
+    attr = getattr(dc, name)
+
+    if isinstance(attr, Flag):
+        attr(args, opt)
+
+    elif isinstance(attr, list):
+        for i in attr:
+            args.append(opt)
+            args.append(i)
+    else:
+        if (not attr) and action.default:
+            attr = action.default
+        if attr:
+            if opt not in parser.pos_args:
+                args.append(opt)
+                args.append(attr)
+            else:
+                pos.append(attr)
+
+args.extend(pos)
+
+from go2rpm.__main__ import main
+sys.argv = args
+main()

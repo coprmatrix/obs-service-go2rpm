@@ -4,7 +4,7 @@ Name:           obs-service-%{service}
 Summary:        An OBS source service: Create spec files for rust crates
 License:        GPL-2.0-or-later
 Group:          Development/Tools/Building
-Version:        1.17
+Version:        1.18
 Release:        0%{?autorelease}
 Source:         %{service}
 Requires:       go2rpm

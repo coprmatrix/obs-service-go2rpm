@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from os import environ
+from os import environ, chdir
 
 name = 'go2rpm'
 summary = 'Use of the rust2rpm command'
@@ -244,7 +244,6 @@ for action in parser._actions:
 
     if isinstance(attr, Flag):
         attr(args, opt)
-
     elif isinstance(attr, list):
         for i in attr:
             args.append(opt)
@@ -253,7 +252,9 @@ for action in parser._actions:
         if (not attr) and action.default:
             attr = action.default
         if attr:
-            if opt not in parser.pos_args:
+            if opt == '--outdir':
+                chdir(attr)
+            elif opt not in parser.pos_args:
                 args.append(opt)
                 args.append(attr)
             else:

@@ -7,6 +7,7 @@ Group:          Development/Tools/Building
 Version:        1.18
 Release:        0%{?autorelease}
 Source:         %{service}
+Requires:       rpmdevtools
 Requires:       go2rpm
 BuildRequires:  python3
 BuildArch:      noarch
